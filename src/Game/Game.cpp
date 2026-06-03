@@ -3,10 +3,11 @@
 #include <glm/glm.hpp>
 
 #include "Game.h"
-#include "Logger.h"
+#include "../Logger/Logger.h"
 
 Game::Game()
 {
+    Logger::Log("Game constructor called\n");
     millisecsPreviousFrame = 0;
     isRunning = false;
 }
@@ -18,7 +19,7 @@ Game::~Game()
 
 void Game::Initialize()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         Logger::Err("Error initializing SDL\n");
         return;
