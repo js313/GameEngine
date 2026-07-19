@@ -33,7 +33,7 @@ void Logger::Log(const std::string &message)
     logEntry.type = LOG_INFO;
     logEntry.message = "LOG: [ " + getDateTime() + " ]\t-\t" + message;
 
-    std::cout << "\033[32m" << logEntry.message << "\033[0m";
+    std::cout << "\033[32m" << logEntry.message << "\033[0m\n";
 
     messages.push_back(logEntry);
 }
@@ -44,7 +44,7 @@ void Logger::Err(const std::string &message)
     logEntry.type = LOG_ERROR;
     logEntry.message = "ERR: [ " + getDateTime() + " ]\t-\t" + message;
 
-    std::cout << "\033[31m" << logEntry.message << "\033[0m";
+    std::cout << "\033[31m" << logEntry.message << "\033[0m\n";
 
     messages.push_back(logEntry);
 }

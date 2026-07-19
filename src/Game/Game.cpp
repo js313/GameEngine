@@ -7,21 +7,22 @@
 
 Game::Game()
 {
-    Logger::Log("Game constructor called\n");
-    millisecsPreviousFrame = 0;
     isRunning = false;
+    millisecsPreviousFrame = 0;
+    registry = new Registry();
+    Logger::Log("Game constructor called");
 }
 
 Game::~Game()
 {
-    Logger::Log("Game destructor called\n");
+    Logger::Log("Game destructor called");
 }
 
 void Game::Initialize()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        Logger::Err("Error initializing SDL\n");
+        Logger::Err("Error initializing SDL");
         return;
     }
 
@@ -57,6 +58,9 @@ void Game::Setup()
 {
     playerPosition = glm::vec2(10.0, 20.0);
     playerVelocity = glm::vec2(100.0, 0.0);
+
+    Entity tank = registry->CreateEntity();
+    Entity truck = registry->CreateEntity();
 }
 
 void Game::Update()
