@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <memory>
+
 #include <SDL2/SDL.h>
 
 #include "../ECS/ECS.h"
@@ -16,7 +18,7 @@ private:
     bool isRunning;
     int millisecsPreviousFrame;
 
-    Registry *registry;
+    std::unique_ptr<Registry> registry;
 
 public:
     Game();
