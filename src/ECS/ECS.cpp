@@ -19,7 +19,7 @@ void System::RemoveEntityFromSystem(Entity entity)
                   { return otherEntity == entity; });
 }
 
-std::vector<Entity> System::GetsystemEntities() const
+std::vector<Entity> System::GetSystemEntities() const
 {
     return entities;
 }
@@ -34,6 +34,7 @@ Entity Registry::CreateEntity()
     int entityId = numEntities++;
 
     Entity entity(entityId);
+    entity.registry = this;
     entitiesToBeAdded.insert(entity);
 
     if ((size_t)entityId >= entityComponentSignatures.size())
@@ -55,7 +56,7 @@ void Registry::AddEntityToSystems(Entity entity)
     {
         const Signature &systemComponentSignature = system.second->GetComponentSignature();
 
-        if ((entityComponentSignature & systemComponentSignature) == systemComponentSignature) // only add if entity has the system requuired components
+        if ((entityComponentSignature & systemComponentSignature) == systemComponentSignature) // only add if entity has the system required components
         {
             system.second->AddEntityToSystem(entity);
         }

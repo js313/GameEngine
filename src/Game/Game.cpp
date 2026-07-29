@@ -6,6 +6,7 @@
 #include "../Logger/Logger.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Systems/MovementSystem.h"
 
 Game::Game()
 {
@@ -61,10 +62,12 @@ void Game::Setup()
     playerPosition = glm::vec2(10.0, 20.0);
     playerVelocity = glm::vec2(100.0, 0.0);
 
+    registry->AddSystem<MovementSystem>();
+
     Entity tank = registry->CreateEntity();
 
-    registry->AddComponent<TransformComponent>(tank, glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    registry->AddComponent<RigidBodyComponent>(tank, glm::vec2(50.0, 0.0));
+    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
 }
 
 void Game::Update()
@@ -78,6 +81,10 @@ void Game::Update()
     millisecsPreviousFrame = SDL_GetTicks();
 
     playerPosition += playerVelocity * glm::vec2(deltaTime, deltaTime);
+
+    registry->GetSystem<MovementSystem>().Update(deltaTime);
+
+    registry->Update(); // update the registry at the end of the frame
 }
 
 void Game::Run()
