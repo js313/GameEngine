@@ -6,7 +6,10 @@
 #include "../Logger/Logger.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Components/SpriteComponent.h"
+
 #include "../Systems/MovementSystem.h"
+#include "../Systems/RenderSystem.h"
 
 Game::Game()
 {
@@ -63,11 +66,17 @@ void Game::Setup()
     playerVelocity = glm::vec2(100.0, 0.0);
 
     registry->AddSystem<MovementSystem>();
+    registry->AddSystem<RenderSystem>();
 
     Entity tank = registry->CreateEntity();
-
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 10.0));
+    tank.AddComponent<SpriteComponent>(32, 32);
+
+    Entity truck = registry->CreateEntity();
+    truck.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 10.0));
+    truck.AddComponent<SpriteComponent>(10, 10);
 }
 
 void Game::Update()
@@ -125,14 +134,16 @@ void Game::Render()
     // SDL_Rect player = {10, 10, 20, 20};
     // SDL_RenderFillRect(renderer, &player);
 
-    SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+    // SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
+    // SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    // SDL_FreeSurface(surface);
 
-    // destination rectangle(location on the rendered window) where we want to place the texture
-    SDL_Rect destinationRectangle = {static_cast<int>(playerPosition.x), static_cast<int>(playerPosition.y), 32, 32};
-    SDL_RenderCopy(renderer, texture, NULL, &destinationRectangle);
-    SDL_DestroyTexture(texture);
+    // // destination rectangle(location on the rendered window) where we want to place the texture
+    // SDL_Rect destinationRectangle = {static_cast<int>(playerPosition.x), static_cast<int>(playerPosition.y), 32, 32};
+    // SDL_RenderCopy(renderer, texture, NULL, &destinationRectangle);
+    // SDL_DestroyTexture(texture);
+
+    registry->GetSystem<RenderSystem>().Update(renderer);
 
     // SDL has concept of 2 buffers and we always draw on back buffer, here we swap those buffers to finally display it on screen
     // This is done to prevent glictches as the whole screen needs to refresh when asomething is drawn on screen
