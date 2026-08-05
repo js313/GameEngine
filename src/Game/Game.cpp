@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
+#include <fstream>
+#include <sstream>
 
 #include "Game.h"
 #include "../Logger/Logger.h"
@@ -16,6 +18,7 @@ Game::Game()
     isRunning = false;
     millisecsPreviousFrame = 0;
     registry = std::make_unique<Registry>();
+    assetStore = std::make_unique<AssetStore>();
     Logger::Log("Game constructor called");
 }
 
@@ -58,25 +61,52 @@ void Game::Initialize()
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); // from fake full screen to actual full screen, by changine the video mode to full screen
 }
 
-glm::vec2 playerPosition, playerVelocity;
-
 void Game::Setup()
 {
-    playerPosition = glm::vec2(10.0, 20.0);
-    playerVelocity = glm::vec2(100.0, 0.0);
-
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
 
+    assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
+    assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
+    assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
+
+    // load jungle.map as a 2D integer array
+    std::ifstream mapFile("./assets/tilemaps/jungle.map");
+    if (!mapFile.is_open())
+    {
+        Logger::Err("Error opening jungle.map");
+    }
+
+    int tileSize = 32;
+    double tileScale = 1.0;
+    int mapNumCols = 25;
+    int mapNumRows = 20;
+
+    for (int y = 0; y < mapNumRows; y++)
+    {
+        for (int x = 0; x < mapNumCols; x++)
+        {
+            // very smart as, as the tileMap image is 10 across so the numbers like '21' represent 2nd row and 1st column
+            // so we need to get the first digit for the y coordinate and second digit for the x coordinate
+            // but only works if: 1. the tileMap image is 10 across, 2. the map file is formatted correctly with no spaces and only double digit numbers
+            int srcRectY = mapFile.get() - '0';
+            int srcRectX = mapFile.get() - '0';
+            mapFile.ignore(); // ignore the comma
+            Entity tileEntity = registry->CreateEntity();
+            tileEntity.AddComponent<TransformComponent>(glm::vec2(x * (tileSize * tileScale), y * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
+            tileEntity.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX * tileSize, srcRectY * tileSize);
+        }
+    }
+
     Entity tank = registry->CreateEntity();
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 10.0));
-    tank.AddComponent<SpriteComponent>(32, 32);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
+    tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 10.0));
-    truck.AddComponent<SpriteComponent>(10, 10);
+    truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
 }
 
 void Game::Update()
@@ -88,8 +118,6 @@ void Game::Update()
     }
     double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0; // in secs
     millisecsPreviousFrame = SDL_GetTicks();
-
-    playerPosition += playerVelocity * glm::vec2(deltaTime, deltaTime);
 
     registry->GetSystem<MovementSystem>().Update(deltaTime);
 
@@ -143,7 +171,7 @@ void Game::Render()
     // SDL_RenderCopy(renderer, texture, NULL, &destinationRectangle);
     // SDL_DestroyTexture(texture);
 
-    registry->GetSystem<RenderSystem>().Update(renderer);
+    registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
 
     // SDL has concept of 2 buffers and we always draw on back buffer, here we swap those buffers to finally display it on screen
     // This is done to prevent glictches as the whole screen needs to refresh when asomething is drawn on screen
