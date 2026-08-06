@@ -94,19 +94,19 @@ void Game::Setup()
             mapFile.ignore(); // ignore the comma
             Entity tileEntity = registry->CreateEntity();
             tileEntity.AddComponent<TransformComponent>(glm::vec2(x * (tileSize * tileScale), y * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
-            tileEntity.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX * tileSize, srcRectY * tileSize);
+            tileEntity.AddComponent<SpriteComponent>("tilemap-image", 0, tileSize, tileSize, srcRectX * tileSize, srcRectY * tileSize);
         }
     }
 
     Entity tank = registry->CreateEntity();
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
-    tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
+    tank.AddComponent<SpriteComponent>("tank-image", 1, 32, 32);
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 10.0));
-    truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
+    truck.AddComponent<SpriteComponent>("truck-image", 1, 32, 32);
 }
 
 void Game::Update()

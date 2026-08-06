@@ -1,6 +1,9 @@
 #ifndef RENDERSYSTEM_H
 #define RENDERSYSTEM_H
 
+#include <vector>
+#include <algorithm>
+
 #include <SDL2/SDL.h>
 
 #include "../ECS/ECS.h"
@@ -19,7 +22,10 @@ public:
 
     void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore)
     {
-        for (Entity entity : GetSystemEntities())
+        std::vector<Entity> entities = GetSystemEntities();
+        sort(entities.begin(), entities.end(), [](Entity &a, Entity &b)
+             { return a.GetComponent<SpriteComponent>().zIndex < b.GetComponent<SpriteComponent>().zIndex; });
+        for (Entity entity : entities)
         {
             const TransformComponent &transform = entity.GetComponent<TransformComponent>();
             const SpriteComponent &sprite = entity.GetComponent<SpriteComponent>();
