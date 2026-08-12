@@ -9,9 +9,11 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/AnimationComponent.h"
 
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Systems/AnimationSystem.h"
 
 Game::Game()
 {
@@ -37,6 +39,8 @@ void Game::Initialize()
 
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
+    windowWidth = 800;  // displayMode.w;
+    windowHeight = 600; // displayMode.h;
 
     window = SDL_CreateWindow(
         NULL,
@@ -65,9 +69,12 @@ void Game::Setup()
 {
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
+    registry->AddSystem<AnimationSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
+    assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper.png");
+    assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
 
     // load jungle.map as a 2D integer array
@@ -98,15 +105,26 @@ void Game::Setup()
         }
     }
 
-    Entity tank = registry->CreateEntity();
-    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
-    tank.AddComponent<SpriteComponent>("tank-image", 1, 32, 32);
+    // Entity tank = registry->CreateEntity();
+    // tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    // tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
+    // tank.AddComponent<SpriteComponent>("tank-image", 1, 32, 32);
 
-    Entity truck = registry->CreateEntity();
-    truck.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 10.0));
-    truck.AddComponent<SpriteComponent>("truck-image", 1, 32, 32);
+    // Entity truck = registry->CreateEntity();
+    // truck.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    // truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 10.0));
+    // truck.AddComponent<SpriteComponent>("truck-image", 1, 32, 32);
+
+    Entity chopper = registry->CreateEntity();
+    chopper.AddComponent<TransformComponent>(glm::vec2(50.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 10.0));
+    chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32);
+    chopper.AddComponent<AnimationComponent>(2, 10, true);
+
+    Entity radar = registry->CreateEntity();
+    radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 42.0, 10.0), glm::vec2(0.5, 0.5), 0.0);
+    radar.AddComponent<SpriteComponent>("radar-image", 1, 64, 64);
+    radar.AddComponent<AnimationComponent>(8, 5, true);
 }
 
 void Game::Update()
@@ -120,6 +138,7 @@ void Game::Update()
     millisecsPreviousFrame = SDL_GetTicks();
 
     registry->GetSystem<MovementSystem>().Update(deltaTime);
+    registry->GetSystem<AnimationSystem>().Update();
 
     registry->Update(); // update the registry at the end of the frame
 }
