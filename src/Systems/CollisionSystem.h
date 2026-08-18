@@ -1,6 +1,8 @@
 #ifndef COLLISIONSYSTEM_H
 #define COLLISIONSYSTEM_H
 
+#include <SDL2/SDL.h>
+
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
 #include "../Components/TransformComponent.h"
@@ -18,12 +20,16 @@ public:
     void Update()
     {
         auto entities = GetSystemEntities();
+        for (const Entity &entity : entities)
+        {
+            entity.GetComponent<BoxColliderComponent>().isColliding = false;
+        }
         for (int i = 0; i < (int)entities.size(); i++)
         {
+            const Entity &entityA = entities[i];
             for (int j = i + 1; j < (int)entities.size(); j++)
             {
-                Entity entityA = entities[i];
-                Entity entityB = entities[j];
+                const Entity &entityB = entities[j];
 
                 const TransformComponent &transformA = entityA.GetComponent<TransformComponent>();
                 const BoxColliderComponent &colliderA = entityA.GetComponent<BoxColliderComponent>();
@@ -41,6 +47,8 @@ public:
                 if (CheckAABBCollision(leftA, topA, colliderA.width, colliderA.height, leftB, topB, colliderB.width, colliderB.height))
                 {
                     Logger::Log("Collision detected between Entity " + std::to_string(entityA.GetId()) + " and Entity " + std::to_string(entityB.GetId()));
+                    entityA.GetComponent<BoxColliderComponent>().isColliding = true;
+                    entityB.GetComponent<BoxColliderComponent>().isColliding = true;
                 }
             }
         }

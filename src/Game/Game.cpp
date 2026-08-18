@@ -16,6 +16,7 @@
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
+#include "../Systems/RenderColliderSystem.h"
 
 Game::Game()
 {
@@ -23,6 +24,7 @@ Game::Game()
     millisecsPreviousFrame = 0;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
+    isDebug = false;
     Logger::Log("Game constructor called");
 }
 
@@ -78,6 +80,7 @@ void Game::LoadLevel(int level)
     registry->AddSystem<RenderSystem>();
     registry->AddSystem<AnimationSystem>();
     registry->AddSystem<CollisionSystem>();
+    registry->AddSystem<RenderColliderSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -179,6 +182,12 @@ void Game::ProcessInput()
             if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
                 isRunning = false;
             break;
+        case SDL_KEYUP:
+            if (sdlEvent.key.keysym.sym == SDLK_d)
+                isDebug = !isDebug;
+            break;
+        default:
+            break;
         }
     }
 }
@@ -202,6 +211,8 @@ void Game::Render()
     // SDL_DestroyTexture(texture);
 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+    if (isDebug)
+        registry->GetSystem<RenderColliderSystem>().Update(renderer);
 
     // SDL has concept of 2 buffers and we always draw on back buffer, here we swap those buffers to finally display it on screen
     // This is done to prevent glictches as the whole screen needs to refresh when asomething is drawn on screen

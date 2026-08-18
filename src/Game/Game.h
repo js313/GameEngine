@@ -18,6 +18,7 @@ private:
     SDL_Renderer *renderer;
     bool isRunning;
     int millisecsPreviousFrame;
+    bool isDebug;
 
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
