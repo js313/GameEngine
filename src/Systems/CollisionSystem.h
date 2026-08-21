@@ -26,10 +26,10 @@ public:
         }
         for (int i = 0; i < (int)entities.size(); i++)
         {
-            const Entity &entityA = entities[i];
+            Entity &entityA = entities[i];
             for (int j = i + 1; j < (int)entities.size(); j++)
             {
-                const Entity &entityB = entities[j];
+                Entity &entityB = entities[j];
 
                 const TransformComponent &transformA = entityA.GetComponent<TransformComponent>();
                 const BoxColliderComponent &colliderA = entityA.GetComponent<BoxColliderComponent>();

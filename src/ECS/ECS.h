@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 #include <unordered_map>
+#include <deque>
 #include <typeindex>
 #include <memory>
 
@@ -43,6 +44,7 @@ public:
     Entity(int id) : id(id) {};
     Entity(const Entity &entity) = default;
     int GetId() const;
+    void Kill();
 
     Entity &operator=(const Entity &other) = default;
     bool operator==(const Entity &other) const { return id == other.GetId(); };
@@ -166,13 +168,17 @@ private:
     std::set<Entity> entitiesToBeAdded;
     std::set<Entity> entitiesToBeKilled;
 
+    std::deque<int> freeIds;
+
 public:
     Registry() = default;
 
     Entity CreateEntity();
+    void KillEntity(Entity entity);
 
-    void AddEntityToSystem(Entity entity);
     void AddEntityToSystems(Entity entity);
+
+    void RemoveEntityFromSystems(Entity entity);
 
     template <typename TComponent, typename... TArgs>
     void AddComponent(Entity entity, TArgs &&...args);
