@@ -160,7 +160,7 @@ void Game::LoadLevel(int level)
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 42.0, 10.0), glm::vec2(0.5, 0.5), 0.0);
-    radar.AddComponent<SpriteComponent>("radar-image", 1, 64, 64);
+    radar.AddComponent<SpriteComponent>("radar-image", 1, 64, 64, 0, 0, true);
     radar.AddComponent<AnimationComponent>(8, 5, true);
 }
 
