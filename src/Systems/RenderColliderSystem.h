@@ -16,15 +16,15 @@ public:
         RequireComponent<BoxColliderComponent>();
     }
 
-    void Update(SDL_Renderer *renderer)
+    void Update(SDL_Renderer *renderer, const SDL_Rect &camera)
     {
         for (const Entity &entity : GetSystemEntities())
         {
             const TransformComponent &transform = entity.GetComponent<TransformComponent>();
             const BoxColliderComponent &collider = entity.GetComponent<BoxColliderComponent>();
 
-            float left = transform.position.x + collider.offset.x;
-            float top = transform.position.y + collider.offset.y;
+            float left = transform.position.x + collider.offset.x - camera.x;
+            float top = transform.position.y + collider.offset.y - camera.y;
 
             SDL_Rect boundingBox = {
                 static_cast<int>(left),

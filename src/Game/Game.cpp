@@ -13,6 +13,8 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
 #include "../Components/CameraFollowComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
+#include "../Components/HealthComponent.h"
 
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
@@ -22,6 +24,7 @@
 #include "../Systems/DamageSystem.h"
 #include "../Systems/KeyboardMovementSystem.h"
 #include "../Systems/CameraMovementSystem.h"
+#include "../Systems/ProjectileEmitSystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -100,12 +103,14 @@ void Game::LoadLevel(int level)
     registry->AddSystem<DamageSystem>();
     registry->AddSystem<KeyboardMovementSystem>();
     registry->AddSystem<CameraMovementSystem>();
+    registry->AddSystem<ProjectileEmitSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
     assetStore->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png");
     assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
+    assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
 
     // load jungle.map as a 2D integer array
     std::ifstream mapFile("./assets/tilemaps/jungle.map");
@@ -140,15 +145,19 @@ void Game::LoadLevel(int level)
 
     Entity tank = registry->CreateEntity();
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 1, 32, 32);
     tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 5000, 10000, 0);
+    tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(100.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(-10.0, 0.0));
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-image", 1, 32, 32);
     truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 100.0), 2000, 10000, 0);
+    truck.AddComponent<HealthComponent>(100);
 
     Entity chopper = registry->CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(50.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
@@ -157,6 +166,7 @@ void Game::LoadLevel(int level)
     chopper.AddComponent<AnimationComponent>(2, 10, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -90.0), glm::vec2(90.0, 0), glm::vec2(0, 90.0), glm::vec2(-90.0, 0));
     chopper.AddComponent<CameraFollowComponent>();
+    chopper.AddComponent<HealthComponent>(100);
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 42.0, 10.0), glm::vec2(0.5, 0.5), 0.0);
@@ -185,6 +195,7 @@ void Game::Update()
     registry->GetSystem<CollisionSystem>().Update(eventBus);
     registry->GetSystem<DamageSystem>().Update();
     registry->GetSystem<CameraMovementSystem>().Update(camera);
+    registry->GetSystem<ProjectileEmitSystem>().Update(registry);
 
     registry->Update(); // update the registry at the end of the frame
 }
@@ -245,7 +256,7 @@ void Game::Render()
 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     if (isDebug)
-        registry->GetSystem<RenderColliderSystem>().Update(renderer);
+        registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
 
     // SDL has concept of 2 buffers and we always draw on back buffer, here we swap those buffers to finally display it on screen
     // This is done to prevent glictches as the whole screen needs to refresh when asomething is drawn on screen
