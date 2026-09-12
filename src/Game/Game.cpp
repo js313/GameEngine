@@ -169,6 +169,7 @@ void Game::LoadLevel(int level)
     chopper.AddComponent<AnimationComponent>(2, 10, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -90.0), glm::vec2(90.0, 0), glm::vec2(0, 90.0), glm::vec2(-90.0, 0));
     chopper.AddComponent<CameraFollowComponent>();
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 1000, 5000, 0);
     chopper.AddComponent<HealthComponent>(100);
 
     Entity radar = registry->CreateEntity();
@@ -192,6 +193,7 @@ void Game::Update()
 
     registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus, registry);
 
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
