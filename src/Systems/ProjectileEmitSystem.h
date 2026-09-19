@@ -28,6 +28,7 @@ class ProjectileEmitSystem : public System
             projectilePosition.y += (transform.scale.y * sprite.height / 2);
         }
         Entity projectile = registry->CreateEntity();
+        projectile.Group("projectiles");
         projectile.AddComponent<TransformComponent>(projectilePosition);
         projectile.AddComponent<RigidBodyComponent>(projectileVelocity);
         projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);

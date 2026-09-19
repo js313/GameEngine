@@ -138,6 +138,7 @@ void Game::LoadLevel(int level)
             int srcRectX = mapFile.get() - '0';
             mapFile.ignore(); // ignore the comma
             Entity tileEntity = registry->CreateEntity();
+            tileEntity.Group("tiles");
             tileEntity.AddComponent<TransformComponent>(glm::vec2(x * (tileSize * tileScale), y * (tileSize * tileScale)), glm::vec2(tileScale, tileScale), 0.0);
             tileEntity.AddComponent<SpriteComponent>("tilemap-image", 0, tileSize, tileSize, srcRectX * tileSize, srcRectY * tileSize);
         }
@@ -147,30 +148,34 @@ void Game::LoadLevel(int level)
     mapWidth = mapNumCols * tileSize * tileScale;
 
     Entity tank = registry->CreateEntity();
+    tank.Group("enemies");
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 1, 32, 32);
     tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
-    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 5000, 1000, 0);
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 5000, 1000, 10, false);
     tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry->CreateEntity();
+    truck.Group("enemies");
     truck.AddComponent<TransformComponent>(glm::vec2(100.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-image", 1, 32, 32);
     truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
-    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 100.0), 2000, 2000, 0);
-    truck.AddComponent<HealthComponent>(100);
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 100.0), 2000, 2000, 10, false);
+    truck.AddComponent<HealthComponent>(10);
 
     Entity chopper = registry->CreateEntity();
+    chopper.Tag("player");
     chopper.AddComponent<TransformComponent>(glm::vec2(50.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32, 0, 1 * 32);
+    chopper.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 10, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -90.0), glm::vec2(90.0, 0), glm::vec2(0, 90.0), glm::vec2(-90.0, 0));
     chopper.AddComponent<CameraFollowComponent>();
-    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 1000, 5000, 0);
-    chopper.AddComponent<HealthComponent>(100);
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 1000, 5000, 10, true);
+    chopper.AddComponent<HealthComponent>(30);
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 42.0, 10.0), glm::vec2(0.5, 0.5), 0.0);
