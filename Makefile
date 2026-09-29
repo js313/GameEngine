@@ -4,7 +4,7 @@ LANG_STD = -std=c++20
 COMPILER_FLAGS = -Wall -Wfatal-errors
 INCLUDE_PATH = -I"./libs"
 SRC_FILES = src/*.cpp src/*/*.cpp
-LINKER_FLAGS = -lSDL2 -lSDL2_image -llua5.4
+LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -llua5.4
 OBJ_NAME = gameengine
 
 #Makefile rules
@@ -15,4 +15,4 @@ run:
 	./${OBJ_NAME}
 
 clean:
-	rm ${OBJ_NAME}
+	rm -f ${OBJ_NAME}
