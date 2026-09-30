@@ -28,6 +28,7 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderHealthSystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -116,6 +117,7 @@ void Game::LoadLevel(int level)
     registry->AddSystem<ProjectileEmitSystem>();
     registry->AddSystem<ProjectileLifecycleSystem>();
     registry->AddSystem<RenderTextSystem>();
+    registry->AddSystem<RenderHealthSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -124,6 +126,7 @@ void Game::LoadLevel(int level)
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
     assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
     assetStore->AddFont("charriot-font", "./assets/fonts/charriot.ttf", 14);
+    assetStore->AddFont("charriot-font-small", "./assets/fonts/charriot.ttf", 10);
 
     // load jungle.map as a 2D integer array
     std::ifstream mapFile("./assets/tilemaps/jungle.map");
@@ -165,6 +168,10 @@ void Game::LoadLevel(int level)
     tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 5000, 1000, 10, false);
     tank.AddComponent<HealthComponent>(100);
+    glm::vec2 tankHealthTextPosition = tank.GetComponent<TransformComponent>().position + glm::vec2(0, -15);
+    std::string tankHealthText = std::to_string(tank.GetComponent<HealthComponent>().healthPercent) + "%";
+    SDL_Color tankHealthTextColor = {0, 255, 0, 255};
+    tank.AddComponent<TextLabelComponent>(tankHealthTextPosition, tankHealthText, "charriot-font-small", tankHealthTextColor, false);
 
     Entity truck = registry->CreateEntity();
     truck.Group("enemies");
@@ -174,6 +181,10 @@ void Game::LoadLevel(int level)
     truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
     truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0, 100.0), 2000, 2000, 10, false);
     truck.AddComponent<HealthComponent>(10);
+    glm::vec2 truckHealthTextPosition = truck.GetComponent<TransformComponent>().position + glm::vec2(0, -15);
+    std::string truckHealthText = std::to_string(truck.GetComponent<HealthComponent>().healthPercent) + "%";
+    SDL_Color truckHealthTextColor = {0, 255, 0, 255};
+    truck.AddComponent<TextLabelComponent>(truckHealthTextPosition, truckHealthText, "charriot-font-small", truckHealthTextColor, false);
 
     Entity chopper = registry->CreateEntity();
     chopper.Tag("player");
@@ -184,8 +195,12 @@ void Game::LoadLevel(int level)
     chopper.AddComponent<AnimationComponent>(2, 10, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -90.0), glm::vec2(90.0, 0), glm::vec2(0, 90.0), glm::vec2(-90.0, 0));
     chopper.AddComponent<CameraFollowComponent>();
-    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 1000, 5000, 10, true);
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 0.0), 300, 5000, 10, true);
     chopper.AddComponent<HealthComponent>(30);
+    glm::vec2 chopperHealthTextPosition = chopper.GetComponent<TransformComponent>().position + glm::vec2(0, -15);
+    std::string chopperHealthText = std::to_string(chopper.GetComponent<HealthComponent>().healthPercent) + "%";
+    SDL_Color chopperHealthTextColor = {0, 255, 0, 255};
+    chopper.AddComponent<TextLabelComponent>(chopperHealthTextPosition, chopperHealthText, "charriot-font-small", chopperHealthTextColor, false);
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 42.0, 10.0), glm::vec2(0.5, 0.5), 0.0);
@@ -281,6 +296,7 @@ void Game::Render()
 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     registry->GetSystem<RenderTextSystem>().Update(assetStore, renderer, camera);
+    registry->GetSystem<RenderHealthSystem>().Update(assetStore, renderer, camera);
 
     if (isDebug)
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
