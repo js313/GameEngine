@@ -1,8 +1,11 @@
+#include <fstream>
+#include <sstream>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
-#include <fstream>
-#include <sstream>
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h>
 
 #include "Game.h"
 #include "../Logger/Logger.h"
@@ -91,6 +94,9 @@ void Game::Initialize()
     isRunning = true;
 
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); // from fake full screen to actual full screen, by changine the video mode to full screen
+
+    ImGui::CreateContext();
+    ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
 
     camera.x = 0;
     camera.y = 0;
@@ -256,6 +262,13 @@ void Game::ProcessInput()
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent))
     {
+        ImGuiIO &io = ImGui::GetIO();
+        int mouseX, mouseY;
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+        io.MousePos = ImVec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+
         switch (sdlEvent.type)
         {
         case SDL_QUIT:
@@ -299,7 +312,13 @@ void Game::Render()
     registry->GetSystem<RenderHealthSystem>().Update(assetStore, renderer, camera);
 
     if (isDebug)
+    {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
+        ImGui::Render();
+        ImGuiSDL::Render(ImGui::GetDrawData());
+    }
 
     // SDL has concept of 2 buffers and we always draw on back buffer, here we swap those buffers to finally display it on screen
     // This is done to prevent glictches as the whole screen needs to refresh when asomething is drawn on screen
@@ -308,6 +327,8 @@ void Game::Render()
 
 void Game::Destroy()
 {
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
