@@ -32,6 +32,7 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/RenderHealthSystem.h"
+#include "../Systems/RenderGUISystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -124,6 +125,7 @@ void Game::LoadLevel(int level)
     registry->AddSystem<ProjectileLifecycleSystem>();
     registry->AddSystem<RenderTextSystem>();
     registry->AddSystem<RenderHealthSystem>();
+    registry->AddSystem<RenderGUISystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -314,10 +316,13 @@ void Game::Render()
     if (isDebug)
     {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
-        ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
-        ImGui::Render();
-        ImGuiSDL::Render(ImGui::GetDrawData());
+
+        registry->GetSystem<RenderGUISystem>().Update(renderer, camera);
+
+        // ImGui::NewFrame();
+        // ImGui::ShowDemoWindow();
+        // ImGui::Render();
+        // ImGuiSDL::Render(ImGui::GetDrawData());
     }
 
     // SDL has concept of 2 buffers and we always draw on back buffer, here we swap those buffers to finally display it on screen
