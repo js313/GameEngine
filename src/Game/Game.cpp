@@ -157,6 +157,7 @@ void Game::LoadLevel(int level)
     assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
     assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
+    assetStore->AddTexture(renderer, "tree-image", "./assets/images/tree.png");
     assetStore->AddFont("charriot-font", "./assets/fonts/charriot.ttf", 14);
     assetStore->AddFont("charriot-font-small", "./assets/fonts/charriot.ttf", 10);
 
@@ -192,10 +193,22 @@ void Game::LoadLevel(int level)
     mapHeight = mapNumRows * tileSize * tileScale;
     mapWidth = mapNumCols * tileSize * tileScale;
 
+    Entity treeA = registry->CreateEntity();
+    treeA.Group("obstacles");
+    treeA.AddComponent<TransformComponent>(glm::vec2(600.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
+    treeA.AddComponent<SpriteComponent>("tree-image", 1, 16, 32);
+    treeA.AddComponent<BoxColliderComponent>(16, 32, glm::vec2(0.0, 0.0));
+
+    Entity treeB = registry->CreateEntity();
+    treeB.Group("obstacles");
+    treeB.AddComponent<TransformComponent>(glm::vec2(300.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
+    treeB.AddComponent<SpriteComponent>("tree-image", 1, 16, 32);
+    treeB.AddComponent<BoxColliderComponent>(16, 32, glm::vec2(0.0, 0.0));
+
     Entity tank = registry->CreateEntity();
     tank.Group("enemies");
-    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 1, 32, 32);
     tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0.0, 0.0));
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 5000, 1000, 10, false);
@@ -257,6 +270,7 @@ void Game::Update()
     // Reset and re-subscribe to events every frame
     eventBus->Reset();
 
+    registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus, registry);
