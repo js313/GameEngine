@@ -68,15 +68,27 @@ public:
         for (Entity entity : GetSystemEntities())
         {
             TransformComponent &transform = entity.GetComponent<TransformComponent>();
-            const RigidBodyComponent &rigidBody = entity.GetComponent<RigidBodyComponent>();
+            RigidBodyComponent &rigidBody = entity.GetComponent<RigidBodyComponent>();
 
             transform.position.x += rigidBody.velocity.x * deltaTime;
             transform.position.y += rigidBody.velocity.y * deltaTime;
 
-            bool isOutOfBounds = transform.position.x < 0 || transform.position.y < 0 || transform.position.x > Game::mapWidth || transform.position.y > Game::mapHeight;
+            bool isOutOfBounds = transform.position.x < 0 || transform.position.y < 0 || transform.position.x > Game::mapWidth - 32 || transform.position.y > Game::mapHeight - 32;
             if (isOutOfBounds && !entity.HasTag("player"))
             {
                 entity.Kill();
+            }
+            else if (isOutOfBounds && entity.HasTag("player"))
+            {
+                if (transform.position.x > Game::mapWidth - 32)
+                    transform.position.x = Game::mapWidth - 33;
+                if (transform.position.y > Game::mapHeight - 32)
+                    transform.position.y = Game::mapHeight - 33;
+                if (transform.position.x < 0)
+                    transform.position.x = 1;
+                if (transform.position.y < 0)
+                    transform.position.y = 1;
+                rigidBody.velocity = glm::vec2(0, 0);
             }
         }
     }
