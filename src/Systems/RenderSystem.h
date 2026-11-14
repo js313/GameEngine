@@ -30,6 +30,13 @@ public:
             const TransformComponent &transform = entity.GetComponent<TransformComponent>();
             const SpriteComponent &sprite = entity.GetComponent<SpriteComponent>();
 
+            bool isEntityOutsideCameraView = !(transform.position.x + transform.scale.x * sprite.width > camera.x &&
+                                               transform.position.y + transform.scale.y * sprite.height > camera.y &&
+                                               transform.position.x < camera.x + camera.w &&
+                                               transform.position.y < camera.y + camera.h);
+            if (isEntityOutsideCameraView && !sprite.isFixed)
+                continue;
+
             SDL_Rect srcRect = sprite.srcRect;
 
             SDL_Rect dstRect = {
